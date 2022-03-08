@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="member.mapper">
+
+	<!--  회원 정보 수정-->
+	<update id="member_update">
+		update member 
+		set(name = #{name}, idnum= #{idnum},gender= #{gender}, tech_grade= #{tech_grade}, hire_type = #{hire_type}, job= #{job}, name_eng = #{name_eng},name_chn = #{name_chn}
+		, picture =  #{picture}, birth= #{birth}, married =  #{married}, career =  #{career},salary_type= #{salary_type}, address= #{address},contact =  #{contact}, email =  #{email},
+		alcohol =  #{alcohol})
+		where id = #{id}
+	</update>
+	<!--회원 한명 정보 조회  -->
+	<select id="select_one" resultType="app_member.MemberVO">
+		select * from member
+		where id = #{id}
+	</select>
+	<!-- 회원 등록  -->
+	<insert id="member_regist">
+		insert into member (name, idnum, gender, tech_grade, hire_type, job, name_eng, name_chn, picture
+		, birth, married, career, salary_type, address, contact, email, alcohol )
+		values ( #{name}, #{idnum}, #{gender}, #{tech_grade}, #{hire_type}, #{job}, #{name_eng}, #{name_chn}
+		, #{picture}, #{birth}, #{married}, #{career}, #{salary_type}, #{address}, #{contact}, #{email}, #{alcohol})
+	</insert>
+	<!-- 검색한 회원 수 조회 -->
+ 	<select id="totalList_search" resultType="integer">
+		select count(*) from member 
+		<include refid="where_search" />
+	</select>
+
+	<!-- 검색한 회원 목록 조회 -->
+ 	<select id="list_search" resultType="app_member.MemberVO">
+		select *
+		from (select rownum num, m.*
+			  from (select * from member 
+			  <include refid="where_search" />
+						order by id) m
+				order by num)
+		where num between #{beginList} and #{endList}
+	</select>
+	
+	<!-- 전체 회원수 조회 -->
+	<select id="totalList" resultType="integer">
+		select count(*) from member
+	</select>
+	
+	<!-- 전체 회원 목록  -->
+	<select id="list" resultType="app_member.MemberVO">
+		select *
+		from (select rownum num, m.*
+		from (select * from member) m)
+		where num between #{beginList} and #{endList}
+	</select>
+	<!--회원 정보 추가  -->
+	<!-- <insert id="member_regist">
+		insert into member
+		value( #{name}, #{idnum}, #{gender}, #{tech_grade}, #{hire}, #{job})
+	</insert> -->
+	
+	<!-- 회원 삭제 -->
+	<delete id="member_delete">
+		delete from member where id = #{id}
+	</delete>
+	
+	<!--검색을 위한 단축어  -->
+   <sql id = 'where_search'>
+	<if test="search=='name' or search=='gender' or search=='tech_grade'">
+		where ${search} like '%'|| #{keyword} || '%' 
+	</if>
+	
+	<if test="search == 'all' and keyword != '' ">
+		where name like '%'|| #{keyword} ||'%'	
+		or gender like '%'|| #{keyword} ||'%'
+		or tech_grade like '%'|| #{keyword} ||'%'
+		or hire_type like '%'|| #{keyword} ||'%'
+		or job like '%'|| #{keyword} ||'%'
+		or idnum like '%'|| #{keyword} ||'%'
+		
+	</if>
+	
+</sql>
+</mapper>
