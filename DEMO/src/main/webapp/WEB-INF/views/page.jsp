@@ -45,7 +45,7 @@
 	}
 	
 	.page_prev, .page_next, .page_last, .page_first {
-		width: 30px; height: 32px; color: #777; border: 1px solid gray;
+		width: 30px; height: 32px; color: #777;
 		text-indent: -99999999999px;
 	}
 	

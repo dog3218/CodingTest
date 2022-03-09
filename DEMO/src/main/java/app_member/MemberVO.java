@@ -3,7 +3,7 @@ package app_member;
 
 public class MemberVO {
     private String  name, idnum, gender, tech_grade, hire_type, job, name_eng, name_chn, picture,
-    birth, married, career, salary_type, address, contact, email, alcohol;
+    birth, married, career, salary_type, address, contact, email, alcohol ;
     private int id;
    
     public MemberVO() {}

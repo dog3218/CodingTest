@@ -3,13 +3,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="member.mapper">
-
+	<!-- 주민번호 중복 체크  -->
+	<select id="idnum_check" resultType="Integer">
+		select count(*)
+		from member
+		where idnum= #{idnum}
+	</select>
+	
+	
 	<!--  회원 정보 수정-->
-	<update id="member_update">
+	<update id="member_modify">
 		update member 
-		set(name = #{name}, idnum= #{idnum},gender= #{gender}, tech_grade= #{tech_grade}, hire_type = #{hire_type}, job= #{job}, name_eng = #{name_eng},name_chn = #{name_chn}
-		, picture =  #{picture}, birth= #{birth}, married =  #{married}, career =  #{career},salary_type= #{salary_type}, address= #{address},contact =  #{contact}, email =  #{email},
-		alcohol =  #{alcohol})
+		set name = #{name, jdbcType=VARCHAR}, idnum= #{idnum},gender= #{gender, jdbcType=VARCHAR}, tech_grade= #{tech_grade, jdbcType=VARCHAR}, hire_type = #{hire_type}, job= #{job, jdbcType=VARCHAR}, name_eng = #{name_eng, jdbcType=VARCHAR}, name_chn = #{name_chn, jdbcType=VARCHAR}
+		, picture =  #{picture, jdbcType=VARCHAR}, birth= #{birth, jdbcType=VARCHAR}, married =  #{married, jdbcType=VARCHAR}, career =  #{career, jdbcType=VARCHAR},salary_type= #{salary_type, jdbcType=VARCHAR}, address= #{address, jdbcType=VARCHAR},contact =  #{contact, jdbcType=VARCHAR}, email =  #{email, jdbcType=VARCHAR},
+		alcohol =  #{alcohol, jdbcType=VARCHAR}
 		where id = #{id}
 	</update>
 	<!--회원 한명 정보 조회  -->
@@ -21,8 +28,8 @@
 	<insert id="member_regist">
 		insert into member (name, idnum, gender, tech_grade, hire_type, job, name_eng, name_chn, picture
 		, birth, married, career, salary_type, address, contact, email, alcohol )
-		values ( #{name}, #{idnum}, #{gender}, #{tech_grade}, #{hire_type}, #{job}, #{name_eng}, #{name_chn}
-		, #{picture}, #{birth}, #{married}, #{career}, #{salary_type}, #{address}, #{contact}, #{email}, #{alcohol})
+		values ( #{name}, #{idnum}, #{gender}, #{tech_grade, jdbcType=VARCHAR}, #{hire_type}, #{job}, #{name_eng}, #{name_chn}
+		, #{picture, jdbcType=VARCHAR}, #{birth, jdbcType=VARCHAR}, #{married}, #{career, jdbcType=VARCHAR}, #{salary_type}, #{address}, #{contact}, #{email}, #{alcohol})
 	</insert>
 	<!-- 검색한 회원 수 조회 -->
  	<select id="totalList_search" resultType="integer">
@@ -36,8 +43,8 @@
 		from (select rownum num, m.*
 			  from (select * from member 
 			  <include refid="where_search" />
-						order by id) m
-				order by num)
+						order by id asc) m
+				order by num desc)
 		where num between #{beginList} and #{endList}
 	</select>
 	
@@ -50,7 +57,8 @@
 	<select id="list" resultType="app_member.MemberVO">
 		select *
 		from (select rownum num, m.*
-		from (select * from member) m)
+		from (select * from member order by id asc) m
+		order by num desc)
 		where num between #{beginList} and #{endList}
 	</select>
 	<!--회원 정보 추가  -->

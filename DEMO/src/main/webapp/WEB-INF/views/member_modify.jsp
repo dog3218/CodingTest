@@ -4,34 +4,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-<script type="text/javascript">
-	
-	
-function go_modify(){
-	
-	$("form").submit();
-	if(alert("회원정보가 수정되었습니다.")){
-		location.href="index";
-		return true;
-	}else{
-		return false;
-	}
-
-}
-</script>
 <meta charset="utf-8">
 <link href="css/style.css" rel="stylesheet" type="text/css">
 </head>
 <body topmargin="0" leftmargin="0">
-<form method="post" action="modify_save" enctype="multipart/form-data">
+<form id="modify" method="post" action="modify_save" enctype="multipart/form-data">
+<input type="hidden" name="attach"/>
 <table width="640" border="0" cellspacing="0" cellpadding="0">
   <tr> 
     <td width="640">&nbsp;</td>
   </tr>
   <tr> 
     <td height="25"><img src="image/icon.gif" width="9" height="9" align="absmiddle"> 
-      <strong>사원 기본 정보 등록</strong>
-      <input type="hidden" nane="id" value="${vo.id }"></td>
+      <strong>사원 기본 정보 수정</strong>
+      <input type="hidden" name="id" value="${vo.id }"></td>
   </tr>
   <tr> 
     <td><table width="640" border="0" cellspacing="0" cellpadding="0">
@@ -70,7 +56,10 @@ function go_modify(){
                             <tr>
                               <td height="112" bgcolor="#CCCCCC"><table width="100" border="0" cellspacing="1" cellpadding="0">
                                   <tr>
-                                    <td height="110" bgcolor="#FFFFFF"><span id="preview"></span>&nbsp;</td>
+                                    <td height="110" bgcolor="#FFFFFF">
+                                    <div id="image_container">
+                                    	<img id="preview" 	src="${vo.picture }" style="width: 100px; height: 110px;"/>
+                                    </div>
                                   </tr>
                               </table></td>
                             </tr>
@@ -95,11 +84,12 @@ function go_modify(){
                             </tr>
                             <tr>
                               <td height="26" align="right"><strong>주민등록번호:</strong>&nbsp;
-                              <input type="hidden" name="idnum" value="${vo.idnum}"/>
+                              <input type="hidden" name="idnum" />
                               </td>
-                              <td height="26"><input id="idnum1" name="idnum1" type="text" size="15">
+                              <td height="26">
+                              <input id="idnum1" name="idnum1" type="text" size="15" value="${ data.get('idnum1') }" readonly/>
       														-
-        						<input id="idnum2" name="idnum2" type="text" size="15"></td>
+        						<input id="idnum2" name="idnum2" type="text" size="15"  value="${data.get('idnum2') }" readonly></td>
                             </tr>
                           </table></td>
                         </tr>
@@ -122,8 +112,8 @@ function go_modify(){
                             <td width="102" align="right"><strong>사진파일명:&nbsp;</strong></td>
                             <td width="146">
 	                            <font color="#FF0000">
-	                            <input type="file" id='attach-file' src="image/bt_search.gif" name="file" accept="image/*"
-	                            value="${vo.picture }"/>
+	                            <input type="file" id="image" src="image/bt_search.gif"
+	                            name="file" onchange="setThumbnail(event);"/>
 	                            
 	                            </font>
                             </td>
@@ -134,16 +124,17 @@ function go_modify(){
                       <td bgcolor="#E4EBF1"><table width="500" border="0" cellspacing="1" cellpadding="1">
                           <tr> 
                             <td width="102" align="right"><strong>생년월일:&nbsp;</strong>
-                            <input type="hidden" name="birth" value="${vo.birth }"/> </td>
-                            <td width="391"><input name="birth1" type="text" size="10">
+                            <input type="hidden" name="birth" /> </td>
+                            <td width="391">
+                              <input name="birth1" type="text" size="10"value="${data.get('birth1')}">
                               년 
-                              <input name="birth2" type="text" size="7">
+                              <input name="birth2" type="text" size="7" value="${data.get('birth2')}">
                               월 
-                              <input name="birth3" type="text" size="7">
+                              <input name="birth3" type="text" size="7" value="${data.get('birth3')}">
                               일( 
-                              <input type="radio" name="birth_calendar" value="radiobutton">
+                              <input type="radio" name="birth_calendar" value="양력" ${data.get('birth4') eq "양력" ? "checked" : ''}/>
                               양력 
-                              <input type="radio" name="birth_calendar" value="radiobutton">
+                              <input type="radio" name="birth_calendar" value="음력" ${data.get('birth4') eq "음력" ? "checked" : ''}/>
                               음력)</td>
                           </tr>
                         </table></td>
@@ -152,9 +143,10 @@ function go_modify(){
                       <td bgcolor="#E4EBF1"><table width="500" border="0" cellspacing="1" cellpadding="1">
                           <tr> 
                             <td width="102" align="right"><strong>성별:&nbsp; </strong></td>
-                            <td width="391"> <input type="radio" name="gender" value="남자" ${vo.gender != '남자' ? checked : '' }>
+                            <td width="391"> 
+                             <input type="radio" name="gender" value="남자" ${vo.gender eq "남자" ? "checked" : '' }>
                               남자
-                              <input type="radio" name="gender" value="여자" ${vo.gender != '여자' ? checked : '' }>
+                              <input type="radio" name="gender" value="여자" ${vo.gender eq "여자" ? "checked" : '' }>
                               여자</td>
                           </tr>
                         </table></td>
@@ -164,8 +156,8 @@ function go_modify(){
                           <tr> 
                             <td width="102" align="right"><strong>결혼유무 :&nbsp;</strong></td>
                             <td width="391">
-                            <input type="radio" name="married" value="기혼" ${vo.married != '기혼' ? checked : '' }>유
-                            <input type="radio" name="married" value="미혼" ${vo.married != '미혼' ? checked : '' }>무</td>
+                            <input type="radio" name="married" value="기혼" ${vo.married eq "기혼" ? "checked" : '' }>유
+                            <input type="radio" name="married" value="미혼" ${vo.married eq "미혼" ? "checked" : '' }>무</td>
                           </tr>
                         </table></td>
                     </tr>
@@ -183,8 +175,8 @@ function go_modify(){
                           <tr> 
                             <td width="101" align="right"><strong>급여 지급유형 :&nbsp;</strong></td>
                             <td width="392"> <select name="salary_type">
-                                <option value="month" ${vo.salary_type != 'month' ? selected : '' }>월급</option>
-                                <option value="week" ${vo.salary_type != 'week' ? selected : '' }>주급</option>
+                                <option value="month" ${vo.salary_type eq "month" ? "selected" : '' }>월급</option>
+                                <option value="week" ${vo.salary_type eq "week" ? "selected" : '' }>주급</option>
                               </select> </td>
                           </tr>
                         </table></td>
@@ -194,8 +186,8 @@ function go_modify(){
                           <tr> 
                             <td width="101" align="right"><strong>희망직무 :&nbsp;</strong></td>
                             <td width="392"> <select name="job">
-                                <option value = "SI" ${vo.job != 'SI' ? selected : '' }>SI</option>
-                                <option value = "SM" ${vo.job != 'SM' ? selected : '' }>SM</option>
+                                <option value = "SI" ${vo.job eq 'SI' ? "selected" : '' }>SI</option>
+                                <option value = "SM" ${vo.job eq 'SM' ? "selected" : '' }>SM</option>
                               </select> </td>
                           </tr>
                         </table></td>
@@ -205,8 +197,8 @@ function go_modify(){
                           <tr> 
                             <td width="101" align="right"><strong>입사유형:&nbsp;</strong></td>
                             <td width="392"> <select name="hire_type">
-                                <option value="정규직"  ${vo.hire_type != '정규직' ? selected : '' }>정규직</option>
-                                <option value="계약직"  ${vo.hire_type != '계약직' ? selected : '' }>계약직</option>
+                                <option value="정규직"  ${vo.hire_type eq '정규직' ? "selected" : '' }>정규직</option>
+                                <option value="계약직"  ${vo.hire_type eq '계약직' ? "selected" : '' }>계약직</option>
                               </select> </td>
                           </tr>
                         </table></td>
@@ -235,12 +227,13 @@ function go_modify(){
                       <td bgcolor="#E4EBF1"><table width="500" border="0" cellspacing="1" cellpadding="1">
                           <tr> 
                             <td width="101" align="right"><strong>연락처:&nbsp;</strong>
-                            	<input type="hidden" name="contact" value="${vo.contact }"/></td>
-                            <td width="392"><input name="contact1" type="text" size="10">
+                            	<input type="hidden" name="contact" /></td>
+                            <td width="392">
+                            <input name="contact1" type="text" size="10" value="${data.get('contact1')}" maxlength="3">
                               - 
-                              <input name="contact2" type="text" size="10">
+                              <input name="contact2" type="text" size="10" value="${data.get('contact2')}" maxlength="4">
                               - 
-                              <input name="contact3" type="text" size="10"></td>
+                              <input name="contact3" type="text" size="10" value="${data.get('contact3')}" maxlength="4"></td>
                           </tr>
                         </table></td>
                     </tr>
@@ -285,7 +278,7 @@ function go_modify(){
           <td height="3" align="center">
           <table width="107" border="0" cellpadding="1" cellspacing="1">
             <tr>
-              <td width="49"><a onclick="go_modify()"><img src="image/bt_remove.gif" width="49" height="18"></a></td>
+              <td width="49"><a onclick="on_submit()"><img src="image/bt_remove.gif" width="49" height="18"></a></td>
               <td width="51"><a href="/hello/index"><img src="image/bt_cancel.gif" width="49" height="18"></a></td>
             </tr>
           </table>
@@ -297,35 +290,206 @@ function go_modify(){
       </table></td>
   </tr>
 </table>
-</form>
+	</form>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<!-- 유효성검사 -->
 <script type="text/javascript">
+var pattern_num = /[0-9]/;	// 숫자 
+var pattern_str = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣|a-zA-Z]/; // 문자 체크
 
+$('[name="name"]').on('keyup', function(){
+	var str = $('[name="name"]').val();
+	if( (pattern_str.test(str) )){
+		return true;}
+	else{
+		//$('[name="name"] span).text("문자만 입력가능합니다.");
+		alert("문자만 입력가능합니다."); 
+		$('[name="name"]').val('');
+		return false;}
+});	
+$('[name="name_eng"]').on('keyup', function(){
+	var str = $('[name="name_eng"]').val();
+	if( (pattern_str.test(str) )){return true;}
+	else{ 
+		alert("문자만 입력가능합니다."); 
+		$('[name="name_eng"]').val('');
+		return false;}
+});	
+$('[name="name_chn"]').on('keyup', function(){
+	var str = $('[name="name_chn"]').val();
+	if( (pattern_str.test(str) )){return true;}
+	else{ 
+		alert("문자만 입력가능합니다."); 
+		$('[name="name_chn"]').val('');
+		return false;}
+});	
+$('[name="tech_grade"]').on('keyup', function(){
+	var str = $('[name="tech_grade"]').val();
+	if( (pattern_str.test(str) )){return true;}
+	else{ 
+		alert("문자만 입력가능합니다."); 
+		$('[name="tech_grade"]').val('');
+		return false;}
+});	
 
-if ( ${ ! empty vo.picture} ) {
-	// 첨부 파일이 이미지 파일인 경우 미리보기 되게
-	if ( isImage ( '${vo.picture}' ) )
-		$('#preview').html('<img src="${vo.picture}" id="preview-img" /> ');
-}
+$('[name="idnum1"]').on('keyup', function(){
+	var str = $('[name="idnum1"]').val();
+	if( (pattern_num.test(str) )){return true;}
+	else{ 
+		alert("숫자만 입력가능합니다."); 
+		$('[name="idnum1"]').val('');
+		return false;}
+});	
+$('[name="idnum2"]').on('keyup', function(){
+	var str = $('[name="idnum2"]').val();
+	if( (pattern_num.test(str) )){return true;}
+	else{ 
+		alert("숫자만 입력가능합니다."); 
+		$('[name="idnum2"]').val('');
+		return false;}
+});	
+$('[name="birth1"]').on('keyup', function(){
+	var str = $('[name="birth1"]').val();
+	if( (pattern_num.test(str) )){return true;}
+	else{ 
+		alert("숫자만 입력가능합니다."); 
+		$('[name="birth1"]').val('');
+		return false;}
+});	
+$('[name="birth2"]').on('keyup', function(){
+	var str = $('[name="birth1"]').val();
+	if( (pattern_num.test(str) )){return true;}
+	else{ 
+		alert("숫자만 입력가능합니다."); 
+		$('[name="birth1"]').val('');
+		return false;}
+});	
+$('[name="birth3"]').on('keyup', function(){
+	var str = $('[name="birth1"]').val();
+	if( (pattern_num.test(str) )){return true;}
+	else{ 
+		alert("숫자만 입력가능합니다."); 
+		$('[name="birth1"]').val('');
+		return false;}
+});	
+$('[name="contact1"]').on('keyup', function(){
+	var str = $('[name="contact1"]').val();
+	if( (pattern_num.test(str) )){return true;}
+	else{ 
+		alert("숫자만 입력가능합니다."); 
+		$('[name="contact1"]').val('');
+		return false;}
+});	
+$('[name="contact2"]').on('keyup', function(){
+	var str = $('[name="contact2"]').val();
+	if( (pattern_num.test(str) )){return true;}
+	else{ 
+		alert("숫자만 입력가능합니다."); 
+		$('[name="contact2"]').val('');
+		return false;}
+});	
+$('[name="contact3"]').on('keyup', function(){
+	var str = $('[name="contact3"]').val();
+	if( (pattern_num.test(str) )){return true;}
+	else{ 
+		alert("숫자만 입력가능합니다."); 
+		$('[name="contact3"]').val('');
+		return false;}
+});	
+$('[name="career"]').on('keyup', function(){
+	var str = $('[name="career"]').val();
+	if( (pattern_num.test(str) )){return true;}
+	else{ 
+		alert("숫자만 입력가능합니다."); 
+		$('[name="career"]').val('');
+		return false;}
+});	
 
-
-	$(document).ready(function() {
-	var idnum1 = (${vo.idnum}).substring(0, (${vo.idnum}).indexOf("-"));
-	var idnum2 = (${vo.idnum}).substring((${vo.idnum}).indexOf("-") );
-	
-	$('[name=idnum1]').val(idnum1);
-	$('[name=idnum2]').val(idnum2);
-
-	var contact1 = (${vo.idnum}).substring(0, (${vo.idnum}).indexOf("-"));
-	var contact2 = (${vo.idnum}).substring((${vo.idnum}).indexOf("-"), ${vo.idnum}).substring((${vo.idnum}).lastindexOf("-") );
-	var contact3 = (${vo.idnum}).substring((${vo.idnum}).lastindexOf("-") );
-	
-	$('#idnum1').val(idnum1);
-	$('#idnum2').val(idnum2);
-	
-});
 </script>
+	
+<script type="text/javascript">
+	
+	
+	if ( ${ ! empty vo.picture} ) {
+		// 첨부 파일이 이미지 파일인 경우 미리보기 되게
+		if ( isImage ( '${vo.picture}' ) ){
+			$('#preview').html('<img src="${vo.picture}");
+			$('[name=file]').setAttribute(value, $(vo.file));
+			var attach = document.createElement("input"); 
+			attach.setAttribute("type", "hidden");
+			attach.setAttriute("value", "yes" );
+		}
+	}
 
-<script type="text/javascript" src='js/file_check.js?v<%=new Date().getTime()%>'></script>
+</script>
+	
+<script type="text/javascript">
+	function setThumbnail(event) {
+		debugger;
+		var reader = new FileReader();
+		
+		var file = $('[name=file]').val();
+		if( file.substr(file.length-3)!='jpg'){
+			alert("jpg파일만 올릴 수 있습니다.");
+			$('[name="file"]').val('');
+			return false;
+		}
+		
+		reader.onload = function(event) {
+			
+			if($('#preview').length>0){//선택해놓은 이미지가 있을 때
+				$('#preview').remove();
+				var img = document.createElement("img"); 
+				img.setAttribute("id", "preview");
+				img.setAttribute("src", event.target.result);
+				img.setAttribute("style", "width:100px; height:110px;");
+				document.querySelector("div#image_container").appendChild(img);
+				}
+			else{//선택해놓은 이미지가 없을 때
+				var img = document.createElement("img"); 
+				img.setAttribute("id", "preview");
+				img.setAttribute("src", event.target.result);
+				img.setAttribute("style", "width:100px; height:110px;");
+				document.querySelector("div#image_container").appendChild(img);
+			
+				}
+		}
+		reader.readAsDataURL(event.target.files[0]);
+		}
+	
+	function on_submit() {
+		if(confirm("입력한 정보로 수정하시겠습니까?")){
+		//주민번호 묶기
+		var idnum1 = $('[name="idnum1"]').val();
+		var idnum2 = $('[name="idnum2"]').val();
+		$('[name = idnum]').val(idnum1+"-"+idnum2);
+		
+		//전화번호 묶기
+		var contact1 = $('[name="contact1"]').val();
+		var contact2 = $('[name="contact2"]').val();
+		var contact3 = $('[name="contact3"]').val();
+		$('[name = contact]').val(contact1+"-"+contact2+"-"+contact3);
+		
+		//생년월일 묶기
+		var birth1 = $('[name="birth1"]').val();
+		var birth2 = $('[name="birth2"]').val();
+		var birth3 = $('[name="birth3"]').val();
+		var birth_calendar = $('[name="birth_calendar"]').val();
+		var birth = birth1+birth2+birth3+birth_calendar;
+		$('[name = birth]').val(birth); 
+		$('[name=attach]').val($('#image').text());
+			$('form').submit();
+			alert("수정되었습니다.");
+			return true;
+		}else{
+			return false;
+		}
+		
+	}
+
+	</script>
+	
+
 
 </body>
 </html>

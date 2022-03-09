@@ -11,7 +11,8 @@ $(document).on('change', '#attach-file', function () {
 		/* #preview 태그가 존재하는지 */
 		if($('#preview').length>0){
 			if( isImage(attached.name) ){	//이미지 파일이면 미리보기 처리
-				$('#preview').html('<img src="" id="preview-img" />');
+				$('#preview_pace').attr(height="0");
+				$('#preview').html('<img src="${vo.picture}" id="preview-img" style="width : 100px; height=110px;" />');
 				
 				var reader = new FileReader();
 				reader.onload = function(e){
@@ -23,11 +24,12 @@ $(document).on('change', '#attach-file', function () {
 			$('#preview').html('');
 		}
 		
-	} else {			// 첨부된 파일이 없을 경우
+	} else {// 첨부된 파일이 없을 경우
 		$('#file-name').text('');
 		$('#delete-file').css('display', 'none');		
 	}
-}).on ('click', '#delete-file', function () { // 첨부 파일 삭제시
+}).on ('click', '#delete-file', function () {
+	 // 첨부 파일 삭제시
 	if($('#preview').length>0) $('#preview').html('');	//id=preview가 있으면
 	
 	$('#file-name').text('');

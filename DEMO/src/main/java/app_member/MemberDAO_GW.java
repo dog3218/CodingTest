@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
+
 import app_member.MemberPage;
 
 
@@ -55,9 +56,9 @@ public class MemberDAO_GW{
 			return vo;
 		}
 		
-		public int member_delete(MemberVO vo) {
+		public int member_delete(int id) {
 			
-			return sql.delete("member.mapper.member_delete", vo);
+			return sql.delete("member.mapper.member_delete", id);
 		}
 		
 		public int member_modify(MemberVO vo) {
@@ -66,6 +67,10 @@ public class MemberDAO_GW{
 		
 		public int member_regist(MemberVO vo) {
 			return sql.insert("member.mapper.member_regist", vo);
+		}
+		public boolean member_idnum_check(String idnum) {
+			
+			return (Integer) sql.selectOne("member.mapper.idnum_check",idnum) == 0 ? true : false;
 		}
 		
 		

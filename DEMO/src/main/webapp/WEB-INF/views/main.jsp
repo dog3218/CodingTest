@@ -66,6 +66,7 @@
 </head>
 <body topmargin="0" leftmargin="0">
 
+  <form method="post" action="index" accept-charset="utf-8">
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr> 
     <td>&nbsp;</td>
@@ -74,17 +75,16 @@
     <td height="25"><img src="image/icon.gif" width="9" height="9" align="absmiddle"> 
       <strong>사원조회</strong></td>
   </tr>
-  <form method="post" action="index" accept-charset="utf-8">
   <tr> 
     <td><table width="640" border="0" cellspacing="0" cellpadding="0">
         <tr> 
           <td height="30" align="right">
 	          <select name="select" class="INPUT">
-	              <option value="all" selected>::::: 전체 :::::</option>
-	              <option value="name">이름</option>
-	              <option value="gender">성별</option>
-	              <option value="tech_grade">기술등급</option>
-	            </select> <input name="keyword" type="text" class="INPUT">
+	              <option value="all" ${page.search eq 'all' ? selected : '' } >::::: 전체 :::::</option>
+	              <option value="name" ${page.search eq 'name' ? selected : '' }>이름</option>
+	              <option value="gender" ${page.search eq 'gender' ? selected : '' }>성별</option>
+	              <option value="tech_grade" ${page.search eq 'tech_grade' ? selected : '' }>기술등급</option>
+	            </select> <input name="keyword" type="text" class="INPUT" value="${page.keyword }">
 	            	<a onclick="go_search()">
 	            	<img src="image/search.gif" width="49" height="18" border="0" align="absmiddle"
 	            	/>
@@ -98,7 +98,9 @@
                 <td height="3" background="image/bar_bg1.gif"></td>
               </tr>
               <tr align="center" bgcolor="F8F8F8"> 
-                <td height="26" align="right" bgcolor="F8F8F8" style="padding-right:10"><img src="image/all_icon.gif" width="11" height="11" align="absmiddle"> 
+                <td height="26" align="right" bgcolor="F8F8F8" style="padding-right:10">
+                <input type="checkbox" value='selectall' onclick='selectAll(this)'/><b>전체 선택</b>
+                <img src="image/all_icon.gif" width="11" height="11" align="absmiddle"> 
                   <a onclick="do_modify()">수정</a> <img src="image/all_icon.gif" width="11" height="11" align="absmiddle"> 
                   <a href="#">인사기록카드</a> <img src="image/all_icon.gif" width="11" height="11" align="absmiddle"> 
                   <a href="#">경력정보</a> <img src="image/all_icon.gif" width="11" height="11" align="absmiddle"> 
@@ -150,32 +152,61 @@
               </tr>
             </table></td>
         </tr>
-        </form>
         <tr> 
           <td height="3" background="image/bar_bg1.gif"></td>
         </tr>
       </table></td>
   </tr>
 </table>
+</form>
 <script type="text/javascript">
-	function do_delete() {
-		var leng = $('input:checkbox[name="id"]:checked').length;
 
-		if(leng> 1){
-			alert{"삭제 처리는 한개씩만 가능합니다."};
-			return;
-		}else if(leng==0){
-			alert{"삭제할 회원을 선택해야합니다."}
-		}else{
-			if(confirm{"삭제하시겠습니까?"}){
-			$('input:checkbox[name="checkbox"]').val();
-			$('form').attr('action', 'member_delete');
-			$('form').submit();
-			}else{
-				return;
-			}
-
+	function selectAll(selectAll)  {
+		  const checkboxes 
+		       = document.getElementsByName('id');
+		  
+		  checkboxes.forEach((checkbox) => {
+		    checkbox.checked = selectAll.checked;
+		  })
 		}
+	</script>
+	<script type="text/javascript">
+	function do_delete() {
+		if(confirm("삭제하시겠습니까?") ){
+			var checkBoxArr = [];
+			$("input:checkbox[name='id']:checked").each(function() {
+				  checkBoxArr.push($(this).val());     // 체크된 것만 값을 뽑아서 배열에 push
+				  console.log(checkBoxArr);
+			});
+			var leng = checkBoxArr.length;
+			if(leng==0){
+				alert("삭제할 회원을 선택해야합니다.");
+				return;
+			}else{
+				
+					
+				
+					$.ajax({
+					      type  : "POST",
+					      url    : "<c:url value='/folderDelete.do'/>",
+					      data: {
+					      checkBoxArr : checkBoxArr        // folder seq 값을 가지고 있음.
+					      },
+					      success: function(result){
+					      	console.log(result);
+					      	alert("총 "+result+"명의 회원정보가 삭제되었습니다.");
+					      	location.href="index";
+					      },
+					      error: function(xhr, status, error) {
+					      	alert(error);
+					      }  
+					   });
+					
+				}
+
+			
+		}
+		
 		return;
 	}
 </script>
